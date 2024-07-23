@@ -17,7 +17,7 @@ def string_to_image(string):
     import base64
     img = base64.b64decode(string)
     npimg = np.frombuffer(img, dtype=np.uint8)
-    return cv2.imdecode(npimg, 1)
+    return cv2.flip(cv2.imdecode(npimg, 1), 1)
 
 
 class StreamViewer:
