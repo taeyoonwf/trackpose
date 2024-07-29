@@ -25,6 +25,7 @@
 		6CA2C7782C57559400EF784D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6CA2C77B2C57559400EF784D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6CA2C77D2C57559400EF784D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		6CA2C7882C575ADB00EF784D /* BridgeHeaderLibzmq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BridgeHeaderLibzmq.h; sourceTree = "<group>"; };
 		9CEAA09C606C6DD172DE96DE /* Pods-trackpose.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.release.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.release.xcconfig"; sourceTree = "<group>"; };
 		BE828AB0D0100416660F1577 /* Pods-trackpose.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.debug.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.debug.xcconfig"; sourceTree = "<group>"; };
 		C88D1F19E604996A910B108C /* Pods_trackpose.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_trackpose.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +71,7 @@
 				6CA2C7782C57559400EF784D /* Assets.xcassets */,
 				6CA2C77A2C57559400EF784D /* LaunchScreen.storyboard */,
 				6CA2C77D2C57559400EF784D /* Info.plist */,
+				6CA2C7882C575ADB00EF784D /* BridgeHeaderLibzmq.h */,
 			);
 			path = trackpose;
 			sourceTree = "<group>";
@@ -370,6 +372,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -378,6 +381,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.catix.recordexample.trackpose;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = trackpose/BridgeHeaderLibzmq.h;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -400,6 +404,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -408,6 +413,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.catix.recordexample.trackpose;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = trackpose/BridgeHeaderLibzmq.h;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
