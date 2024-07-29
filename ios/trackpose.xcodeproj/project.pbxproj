@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		137AD1B82017062C0776E4E4 /* Pods_trackpose.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C88D1F19E604996A910B108C /* Pods_trackpose.framework */; };
 		6CA2C7702C57559200EF784D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA2C76F2C57559200EF784D /* AppDelegate.swift */; };
 		6CA2C7722C57559200EF784D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA2C7712C57559200EF784D /* SceneDelegate.swift */; };
 		6CA2C7742C57559200EF784D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA2C7732C57559200EF784D /* ViewController.swift */; };
@@ -24,6 +25,9 @@
 		6CA2C7782C57559400EF784D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6CA2C77B2C57559400EF784D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6CA2C77D2C57559400EF784D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9CEAA09C606C6DD172DE96DE /* Pods-trackpose.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.release.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.release.xcconfig"; sourceTree = "<group>"; };
+		BE828AB0D0100416660F1577 /* Pods-trackpose.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.debug.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.debug.xcconfig"; sourceTree = "<group>"; };
+		C88D1F19E604996A910B108C /* Pods_trackpose.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_trackpose.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				137AD1B82017062C0776E4E4 /* Pods_trackpose.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +47,8 @@
 			children = (
 				6CA2C76E2C57559200EF784D /* trackpose */,
 				6CA2C76D2C57559200EF784D /* Products */,
+				C24C2C4AAEDAFA14295BAB98 /* Pods */,
+				9BCAEAE35A5F304D33FE00DB /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +74,24 @@
 			path = trackpose;
 			sourceTree = "<group>";
 		};
+		9BCAEAE35A5F304D33FE00DB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C88D1F19E604996A910B108C /* Pods_trackpose.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		C24C2C4AAEDAFA14295BAB98 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BE828AB0D0100416660F1577 /* Pods-trackpose.debug.xcconfig */,
+				9CEAA09C606C6DD172DE96DE /* Pods-trackpose.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -74,9 +99,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6CA2C7802C57559400EF784D /* Build configuration list for PBXNativeTarget "trackpose" */;
 			buildPhases = (
+				8695D75092DAE70C6094D3C3 /* [CP] Check Pods Manifest.lock */,
 				6CA2C7682C57559200EF784D /* Sources */,
 				6CA2C7692C57559200EF784D /* Frameworks */,
 				6CA2C76A2C57559200EF784D /* Resources */,
+				4CA2F664BDDE0993FF01F119 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -132,6 +159,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		4CA2F664BDDE0993FF01F119 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-trackpose/Pods-trackpose-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-trackpose/Pods-trackpose-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-trackpose/Pods-trackpose-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8695D75092DAE70C6094D3C3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-trackpose-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6CA2C7682C57559200EF784D /* Sources */ = {
@@ -287,6 +356,7 @@
 		};
 		6CA2C7812C57559400EF784D /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE828AB0D0100416660F1577 /* Pods-trackpose.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -315,6 +385,7 @@
 		};
 		6CA2C7822C57559400EF784D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9CEAA09C606C6DD172DE96DE /* Pods-trackpose.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
