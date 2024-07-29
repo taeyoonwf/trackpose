@@ -1,3 +1,7 @@
+.ipynb_checkpoints/
+*.ipynb
+windows/python/.ipynb_checkpoints
+
 # built application files
 *.apk
 *.ap_
