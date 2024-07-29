@@ -53,3 +53,6 @@ playground.xcworkspace
 
 .build/
 Carthage/Build/
+
+ios/Podfile.lock
+ios/Pods
