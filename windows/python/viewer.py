@@ -30,7 +30,8 @@ class StreamViewer:
         context = zmq.Context()
         self.footage_socket = context.socket(zmq.SUB)
         self.footage_socket.bind('tcp://*:' + port)
-        self.footage_socket.setsockopt_string(zmq.SUBSCRIBE, np.str_(''))
+        self.footage_socket.setsockopt(zmq.SUBSCRIBE, b'')
+        #self.footage_socket.set(zmq.SUBSCRIBE, b'')
         self.current_frame = None
         self.keep_running = True
         self.last_frame = None
@@ -51,6 +52,10 @@ class StreamViewer:
         :param display: boolean, If False no stream output will be displayed.
         :return: None
         """
+        print('what?')
+        data = self.footage_socket.recv()
+        print(len(data))
+        return
         self.keep_running = True
         while self.footage_socket and self.keep_running:
             try:
