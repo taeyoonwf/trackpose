@@ -30,6 +30,7 @@ import android.graphics.RectF
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.view.WindowManager
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -85,7 +86,7 @@ class CameraActivity : AppCompatActivity() {
     private val logger = KotlinLogging.logger {}
     private val zmqContext = ZMQ.context(1)
     private val footageSocket = zmqContext.socket(SocketType.PUB)
-    private val viewer_server_address = "192.168.0.114"
+    private val viewer_server_address = "192.168.0.128" //135" //114" //103" //135"
     private val viewer_port = "5555"
 
     //var bluetoothManager: BluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
@@ -128,6 +129,7 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         activityCameraBinding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(activityCameraBinding.root)
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         activityCameraBinding.cameraCaptureButton.setOnClickListener {
 
@@ -244,6 +246,7 @@ class CameraActivity : AppCompatActivity() {
                 //stream.write()
                 val jsonStr = jsonObj.toString()
                 footageSocket.send(jsonStr)
+                //footageSocket.send(jsonStr.toByteArray())
                 stream.flush()
                 stream.close()
 
