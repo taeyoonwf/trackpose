@@ -44,6 +44,7 @@ class StreamViewer:
         self.time_out_ms = 8 # 125 FPS
         self.disconnect_threshold = 1 # 1 second
         self.time_out_counter = 0
+        self.min_timestamp = 17 * 1e11
 
     def receive_stream(self, display=True):
         """
@@ -52,10 +53,10 @@ class StreamViewer:
         :param display: boolean, If False no stream output will be displayed.
         :return: None
         """
-        print('what?')
+        #print('what?')
         data = self.footage_socket.recv()
         print(len(data))
-        return
+        #return
         self.keep_running = True
         while self.footage_socket and self.keep_running:
             try:
@@ -74,6 +75,11 @@ class StreamViewer:
                 #print(jsonStr)
                 jsonData = json.loads(jsonStr)
                 curr_pub_time = int(jsonData['timestamp'])
+                if curr_pub_time < self.min_timestamp:
+                    print(f'the timestamp of the pub is too much earlier than expected.')
+                    time.sleep(1)
+                    continue
+                #print(curr_pub_time)
                 curr_sub_time = round(time.time() * 1e3)
                 curr_pub_sub_diff = curr_sub_time - curr_pub_time
                 #print(jsonData['timestamp'])
