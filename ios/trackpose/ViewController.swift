@@ -53,13 +53,13 @@ class ViewController: UIViewController {
       var buffer = [UInt8](repeating: 0, count: bufsize)
 
       while true {
-        let rc = zmq_poll(&pollItems, 1, 8)
-            
+        let rc = zmq_poll(&pollItems, 1, streamSync.TIME_OUT_MS)
+
         if rc == -1 {
           print("polling error")
           break
         }
-            
+
         if pollItems[0].revents & Int16(ZMQ_POLLIN) != 0 {
           let size = zmq_recv(self.subscriber, &buffer, bufsize, 0)
           if size >= bufsize {
@@ -78,7 +78,9 @@ class ViewController: UIViewController {
             continue
           }
           DispatchQueue.main.async {
-            self.imageView.image = image
+            if UIApplication.shared.applicationState == .active {
+              self.imageView.image = image
+            }
           }
         }
       }
@@ -104,7 +106,9 @@ class ViewController: UIViewController {
             return
           }
           
-          self.imageView.image = image
+          if UIApplication.shared.applicationState == .active {
+            self.imageView.image = image
+          }
         }
       } catch {
         print("failed to parse JSON: \(error.localizedDescription)")

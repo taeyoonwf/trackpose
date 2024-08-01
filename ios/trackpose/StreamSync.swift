@@ -21,6 +21,7 @@ class StreamSync {
   public let TIME_OUT_MS: Int = 16
   private let DISCONNECT_THRESHOLD: CGFloat = 1.0
   private let MIN_TIMESTAMP: Int64 = Int64(17 * 1e11)
+  private let DIFF_RESET_MULTIPLIER: Int64 = 4
 
   private var curr_frame: String?
   private var curr_pub_time: Int64?
@@ -32,7 +33,7 @@ class StreamSync {
   private var pub_sub_diff_stable: Int = 0
   private var time_out_counter: Int = 0
   
-  public let loading_frame: UIImage = UIImage(color: .black)!
+  public let loading_frame: UIImage = UIImage(color: .brown)!
   //private var regionOfInterestControlRadius: CGFloat {
   //  return regionOfInterestControlDiameter / 2.0
   //}
@@ -73,6 +74,11 @@ class StreamSync {
         pub_sub_diff = curr_pub_sub_diff
         return (Action.CONT, nil)
       }
+      last_pub_time = curr_pub_time
+      last_sub_time = curr_sub_time
+      pub_sub_diff = curr_pub_sub_diff
+      pub_sub_diff_stable = 0
+    } else if curr_pub_sub_diff > max(pub_sub_diff!, Int64(1)) * DIFF_RESET_MULTIPLIER {
       last_pub_time = curr_pub_time
       last_sub_time = curr_sub_time
       pub_sub_diff = curr_pub_sub_diff
