@@ -121,16 +121,6 @@ class StreamViewer:
 
 
     def receive_stream(self, display=True):
-        """
-        Displays displayed stream in a window if no arguments are passed.
-        Keeps updating the 'current_frame' attribute with the most recent frame, this can be accessed using 'self.current_frame'
-        :param display: boolean, If False no stream output will be displayed.
-        :return: None
-        """
-        #print('what?')
-        #data = self.footage_socket.recv()
-        #print(len(data))
-        #return
         streamSync = StreamSync()
         while self.footage_socket and self.keep_running:
             try:
@@ -165,6 +155,12 @@ class StreamViewer:
 
 
     def receive_stream_old(self, display=True):
+        """
+        Displays displayed stream in a window if no arguments are passed.
+        Keeps updating the 'current_frame' attribute with the most recent frame, this can be accessed using 'self.current_frame'
+        :param display: boolean, If False no stream output will be displayed.
+        :return: None
+        """
         self.last_frame = None
         self.last_pub_time = None
         self.last_sub_time = None

@@ -70,7 +70,9 @@ class Streamer:
 
         print("Streaming Stopped!")
         vid.release()
+        print("VideoCapture Released!")
         cv2.destroyAllWindows()
+        print("All the CV Windows Closed!")
 
 def main():
     parser = argparse.ArgumentParser()
