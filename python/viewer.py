@@ -27,24 +27,26 @@ class StreamSync:
         CONT = 1
 
     def __init__(self):
-        #self.last_frame = None
+        self.STABLE_THRESHOLD = 15 # const
+        self.TIME_OUT_MS = 16 # 125 FPS const
+        self.DISCONNECT_THRESHOLD = 1 # 1 second
+        self.MIN_TIMESTAMP = 17 * 1e11
+
+        self.curr_frame = None
+        self.curr_pub_time = None
+
+        self.curr_sub_time = None
         self.last_pub_time = None
         self.last_sub_time = None
         self.pub_sub_diff = None
         self.pub_sub_diff_stable = 0
-        self.stable_threshold = 15
-        self.loading_frame = np.zeros((720, 1280, 3))
-        self.time_out_ms = 16 # 125 FPS
-        self.disconnect_threshold = 1 # 1 second
         self.time_out_counter = 0
-        self.min_timestamp = 17 * 1e11
-        self.curr_frame = None
-        self.curr_pub_time = None
-        self.curr_sub_time = None
+
+        self.loading_frame = np.zeros((720, 1280, 3))
 
     def no_poll_in_data(self):
         self.time_out_counter += 1
-        if self.time_out_counter > 1000 / self.time_out_ms:
+        if self.time_out_counter > self.DISCONNECT_THRESHOLD * 1000 / self.TIME_OUT_MS:
             return (StreamSync.Action.PASS, self.loading_frame)
             #cv2.imshow("Stream", self.loading_frame)
             #cv2.waitKey(1)
@@ -55,7 +57,7 @@ class StreamSync:
         self.curr_pub_time = timestamp
         self.curr_frame = frame
         self.time_out_counter = 0
-        if curr_pub_time < self.min_timestamp:
+        if curr_pub_time < self.MIN_TIMESTAMP:
             print(f'the timestamp of the pub is too much earlier than expected.')
             time.sleep(1)
             return (StreamSync.Action.CONT, None)
@@ -89,7 +91,7 @@ class StreamSync:
 
     def render(self):
         self.last_pub_time, self.last_sub_time = self.curr_pub_time, self.curr_sub_time
-        if self.pub_sub_diff_stable < self.stable_threshold:
+        if self.pub_sub_diff_stable < self.STABLE_THRESHOLD:
             #cv2.imshow("Stream", string_to_image(self.last_frame))
             #print('last frame')
             return (StreamSync.Action.CONT, None)
@@ -124,7 +126,7 @@ class StreamViewer:
         streamSync = StreamSync()
         while self.footage_socket and self.keep_running:
             try:
-                if self.footage_socket.poll(streamSync.time_out_ms) == 0:
+                if self.footage_socket.poll(streamSync.TIME_OUT_MS) == 0:
                     #print('no poll in data')
                     cont, frame = streamSync.no_poll_in_data()
                     if cont == StreamSync.Action.CONT:
