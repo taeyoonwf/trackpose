@@ -34,6 +34,7 @@ class StreamViewer:
         #self.footage_socket.set(zmq.SUBSCRIBE, b'')
         self.current_frame = None
         self.keep_running = True
+
         self.last_frame = None
         self.last_pub_time = None
         self.last_sub_time = None

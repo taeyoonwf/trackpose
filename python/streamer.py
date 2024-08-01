@@ -53,7 +53,7 @@ class Streamer:
                 timestamp = int(time.time() * 1e3)
                 fps_timesum += timestamp - last_timestamp
                 fps_timecnt += 1
-                if fps_timesum > 5000:
+                if fps_timesum > 10000:
                     print(f'fps : {1000 / (fps_timesum / fps_timecnt)}')
                     fps_timesum, fps_timecnt = 0, 0
                 #print(f'fps : {1000 / (timestamp - last_timestamp)}')
