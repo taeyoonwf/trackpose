@@ -31,6 +31,7 @@ class StreamSync:
         self.TIME_OUT_MS = 16 # 125 FPS const
         self.DISCONNECT_THRESHOLD = 1 # 1 second
         self.MIN_TIMESTAMP = 17 * 1e11
+        self.DIFF_RESET_MULTIPLIER = 4
 
         self.curr_frame = None
         self.curr_pub_time = None
@@ -83,9 +84,14 @@ class StreamSync:
             self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
             self.pub_sub_diff = curr_pub_sub_diff
             self.pub_sub_diff_stable = 0
+        elif curr_pub_sub_diff > max(self.pub_sub_diff, 1) * self.DIFF_RESET_MULTIPLIER:
+            self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
+            self.pub_sub_diff = curr_pub_sub_diff
+            self.pub_sub_diff_stable = 0
         else:
             self.pub_sub_diff_stable += 1
 
+        #print(self.pub_sub_diff_stable)
         return (StreamSync.Action.PASS, None)
 
 
@@ -120,7 +126,14 @@ class StreamViewer:
         #self.footage_socket.set(zmq.SUBSCRIBE, b'')
         #self.current_frame = None
         self.keep_running = True
+        self.debug_count = 0
 
+    def force_packet_delay(self, frame):
+        if frame[100, 100].max() != 0:
+            self.debug_count += 1
+            if self.debug_count > 60:
+                self.debug_count = 0
+                time.sleep(0.125)
 
     def receive_stream(self, display=True):
         streamSync = StreamSync()
@@ -147,6 +160,7 @@ class StreamViewer:
 
                 cv2.imshow("Stream", frame)
                 cv2.waitKey(1)
+                #self.force_packet_delay(frame)
             except KeyboardInterrupt:
                 cv2.destroyAllWindows()
                 break
