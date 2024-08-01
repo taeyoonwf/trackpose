@@ -7,6 +7,7 @@ import zmq
 #from utils import string_to_image
 import time
 import json
+from enum import Enum
 
 
 PORT = '5555'
@@ -18,6 +19,89 @@ def string_to_image(string):
     img = base64.b64decode(string)
     npimg = np.frombuffer(img, dtype=np.uint8)
     return cv2.flip(cv2.imdecode(npimg, 1), 1)
+
+
+class StreamSync:
+    class Action(Enum):
+        PASS = 0
+        CONT = 1
+
+    def __init__(self):
+        #self.last_frame = None
+        self.last_pub_time = None
+        self.last_sub_time = None
+        self.pub_sub_diff = None
+        self.pub_sub_diff_stable = 0
+        self.stable_threshold = 15
+        self.loading_frame = np.zeros((720, 1280, 3))
+        self.time_out_ms = 16 # 125 FPS
+        self.disconnect_threshold = 1 # 1 second
+        self.time_out_counter = 0
+        self.min_timestamp = 17 * 1e11
+        self.curr_frame = None
+        self.curr_pub_time = None
+        self.curr_sub_time = None
+
+    def no_poll_in_data(self):
+        self.time_out_counter += 1
+        if self.time_out_counter > 1000 / self.time_out_ms:
+            return (StreamSync.Action.PASS, self.loading_frame)
+            #cv2.imshow("Stream", self.loading_frame)
+            #cv2.waitKey(1)
+        return (StreamSync.Action.CONT, None)
+
+    def update(self, timestamp, frame):
+        curr_pub_time = timestamp
+        self.curr_pub_time = timestamp
+        self.curr_frame = frame
+        self.time_out_counter = 0
+        if curr_pub_time < self.min_timestamp:
+            print(f'the timestamp of the pub is too much earlier than expected.')
+            time.sleep(1)
+            return (StreamSync.Action.CONT, None)
+
+        curr_sub_time = round(time.time() * 1e3)
+        self.curr_sub_time = curr_sub_time
+        curr_pub_sub_diff = curr_sub_time - curr_pub_time
+        #print(jsonData['timestamp'])
+        if not self.last_pub_time:
+            self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
+            self.pub_sub_diff = curr_pub_sub_diff
+            #self.last_frame = jsonData['frame']
+            return (StreamSync.Action.CONT, None)
+
+        delta_time = curr_pub_time - self.last_pub_time
+        if curr_pub_sub_diff < self.pub_sub_diff:
+            if curr_pub_sub_diff < self.pub_sub_diff - delta_time * 0.5:
+                self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
+                self.pub_sub_diff = curr_pub_sub_diff
+                #self.last_frame = string_to_image(frame)
+                return (StreamSync.Action.CONT, None)
+            print(f'{self.pub_sub_diff}, {curr_pub_sub_diff}')
+            self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
+            self.pub_sub_diff = curr_pub_sub_diff
+            self.pub_sub_diff_stable = 0
+        else:
+            self.pub_sub_diff_stable += 1
+
+        return (StreamSync.Action.PASS, None)
+
+
+    def render(self):
+        self.last_pub_time, self.last_sub_time = self.curr_pub_time, self.curr_sub_time
+        if self.pub_sub_diff_stable < self.stable_threshold:
+            #cv2.imshow("Stream", string_to_image(self.last_frame))
+            #print('last frame')
+            return (StreamSync.Action.CONT, None)
+        #else:
+            #cv2.imshow("Stream", string_to_image(self.curr_frame))
+            #ret = (StreamSync.Action.PASS, string_to_image(self.curr_frame))
+
+        #self.last_frame = jsonData['frame']
+        image = string_to_image(self.curr_frame)
+        if image.shape != self.loading_frame.shape:
+            self.loading_frame = np.zeros(image.shape)
+        return (StreamSync.Action.PASS, image)
 
 
 class StreamViewer:
@@ -32,9 +116,55 @@ class StreamViewer:
         self.footage_socket.bind('tcp://*:' + port)
         self.footage_socket.setsockopt(zmq.SUBSCRIBE, b'')
         #self.footage_socket.set(zmq.SUBSCRIBE, b'')
-        self.current_frame = None
+        #self.current_frame = None
         self.keep_running = True
 
+
+    def receive_stream(self, display=True):
+        """
+        Displays displayed stream in a window if no arguments are passed.
+        Keeps updating the 'current_frame' attribute with the most recent frame, this can be accessed using 'self.current_frame'
+        :param display: boolean, If False no stream output will be displayed.
+        :return: None
+        """
+        #print('what?')
+        #data = self.footage_socket.recv()
+        #print(len(data))
+        #return
+        streamSync = StreamSync()
+        while self.footage_socket and self.keep_running:
+            try:
+                if self.footage_socket.poll(streamSync.time_out_ms) == 0:
+                    #print('no poll in data')
+                    cont, frame = streamSync.no_poll_in_data()
+                    if cont == StreamSync.Action.CONT:
+                        continue
+                else:
+                    #print('poll in data')
+                    jsonStr = self.footage_socket.recv_string()
+                    jsonData = json.loads(jsonStr)
+                    #print(jsonData['timestamp'])
+
+                    cont, frame = streamSync.update(timestamp = int(jsonData['timestamp']), frame = jsonData['frame'])
+                    if cont == StreamSync.Action.CONT:
+                        continue
+
+                    cont, frame = streamSync.render()
+                    if cont == StreamSync.Action.CONT:
+                        continue
+
+                cv2.imshow("Stream", frame)
+                cv2.waitKey(1)
+            except KeyboardInterrupt:
+                cv2.destroyAllWindows()
+                break
+            except e:
+                print(e)
+                break
+        print("Streaming Stopped!")
+
+
+    def receive_stream_old(self, display=True):
         self.last_frame = None
         self.last_pub_time = None
         self.last_sub_time = None
@@ -47,18 +177,6 @@ class StreamViewer:
         self.time_out_counter = 0
         self.min_timestamp = 17 * 1e11
 
-    def receive_stream(self, display=True):
-        """
-        Displays displayed stream in a window if no arguments are passed.
-        Keeps updating the 'current_frame' attribute with the most recent frame, this can be accessed using 'self.current_frame'
-        :param display: boolean, If False no stream output will be displayed.
-        :return: None
-        """
-        #print('what?')
-        data = self.footage_socket.recv()
-        print(len(data))
-        #return
-        self.keep_running = True
         while self.footage_socket and self.keep_running:
             try:
                 #print('waiting')
@@ -70,6 +188,7 @@ class StreamViewer:
                         cv2.imshow("Stream", self.loading_frame)
                         cv2.waitKey(1)
                     continue
+
                 self.time_out_counter = 0
                 jsonStr = self.footage_socket.recv_string()
                 #print('recv_string')
