@@ -57,10 +57,11 @@ class Streamer:
                     print(f'fps : {1000 / (fps_timesum / fps_timecnt)}')
                     fps_timesum, fps_timecnt = 0, 0
                 #print(f'fps : {1000 / (timestamp - last_timestamp)}')
-                self.footage_socket.send_string(json.dumps({
-                    'timestamp': timestamp,
+                json_data = json.dumps({
                     'frame': image_as_string
-                }))
+                })
+                json_data = ''.join(['{"timestamp":', str(timestamp), ',', json_data[1:]])
+                self.footage_socket.send_string(json_data)
                 last_timestamp = timestamp
                 cv2.imshow("sender\'s frame", frame)
                 cv2.waitKey(1)

@@ -175,7 +175,8 @@ class StreamViewer:
                     if cont == StreamSync.Action.CONT:
                         continue
 
-                    self.draw_accelerometer(jsonData['accelerometer'], frame)
+                    if 'accelerometer' in jsonData:
+                        self.draw_accelerometer(jsonData['accelerometer'], frame)
 
                 cv2.imshow("Stream", frame)
                 cv2.waitKey(1)
