@@ -314,7 +314,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
 
     private fun reportAccSensor() = activityCameraBinding.viewFinder.post {
         activityCameraBinding.textPrediction.text = "${"%.2f".format(accY)} ${"%.2f".format(accZ)}"
-
+        activityCameraBinding.lineView?.setAccelerometer(accX, accY, accZ)
     }
 
     private fun reportPrediction(
