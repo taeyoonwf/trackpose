@@ -15,6 +15,7 @@
 		6CA2C7792C57559400EF784D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6CA2C7782C57559400EF784D /* Assets.xcassets */; };
 		6CA2C77C2C57559400EF784D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6CA2C77A2C57559400EF784D /* LaunchScreen.storyboard */; };
 		6CB13B2D2C5BC9E4008245B6 /* StreamSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB13B2C2C5BC9E4008245B6 /* StreamSync.swift */; };
+		6CB13B2F2C5F9FFE008245B6 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CB13B2E2C5F9FFE008245B6 /* LineView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		6CA2C77D2C57559400EF784D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6CA2C7882C575ADB00EF784D /* BridgeHeaderLibzmq.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BridgeHeaderLibzmq.h; sourceTree = "<group>"; };
 		6CB13B2C2C5BC9E4008245B6 /* StreamSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSync.swift; sourceTree = "<group>"; };
+		6CB13B2E2C5F9FFE008245B6 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		9CEAA09C606C6DD172DE96DE /* Pods-trackpose.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.release.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.release.xcconfig"; sourceTree = "<group>"; };
 		BE828AB0D0100416660F1577 /* Pods-trackpose.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-trackpose.debug.xcconfig"; path = "Target Support Files/Pods-trackpose/Pods-trackpose.debug.xcconfig"; sourceTree = "<group>"; };
 		C88D1F19E604996A910B108C /* Pods_trackpose.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_trackpose.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +72,7 @@
 				6CA2C7712C57559200EF784D /* SceneDelegate.swift */,
 				6CA2C7732C57559200EF784D /* ViewController.swift */,
 				6CB13B2C2C5BC9E4008245B6 /* StreamSync.swift */,
+				6CB13B2E2C5F9FFE008245B6 /* LineView.swift */,
 				6CA2C7752C57559200EF784D /* Main.storyboard */,
 				6CA2C7782C57559400EF784D /* Assets.xcassets */,
 				6CA2C77A2C57559400EF784D /* LaunchScreen.storyboard */,
@@ -214,6 +217,7 @@
 				6CB13B2D2C5BC9E4008245B6 /* StreamSync.swift in Sources */,
 				6CA2C7742C57559200EF784D /* ViewController.swift in Sources */,
 				6CA2C7702C57559200EF784D /* AppDelegate.swift in Sources */,
+				6CB13B2F2C5F9FFE008245B6 /* LineView.swift in Sources */,
 				6CA2C7722C57559200EF784D /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

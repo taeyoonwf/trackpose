@@ -14,9 +14,23 @@ class ViewController: UIViewController {
   let queue = DispatchQueue(label: "com.yourapp.zeromq", qos: .background)
   //var resized: Bool = false
   let streamSync: StreamSync = StreamSync()
-
+  var lineView: LineView?
+  
   @IBOutlet private var imageView: UIImageView!
+  @IBOutlet private var slider: UISlider! {
+    didSet{
+      //print(imageView.frame.size)
+      slider.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi / 2)).translatedBy(x: 0, y: imageView.frame.size.width / 2 - 30)
+      
+    }
+  }
 
+  @IBAction func updateSlider(_ sender: UISlider) {
+    //print(imageView.bounds.)
+    //print("sliding now")
+    lineView!.updateGap(gap: CGFloat(sender.value))
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     UIApplication.shared.isIdleTimerDisabled = true
@@ -26,6 +40,9 @@ class ViewController: UIViewController {
       //imageView.frame.size = CGSize(width: imageView.frame.width, height: imageView.frame.height - 59)
     }
     // Do any additional setup after loading the view.
+    lineView = LineView(frame: imageView.bounds)
+    imageView.addSubview(lineView!)
+    lineView?.updateGap(gap: 0.5)
 
     context = zmq_ctx_new()
     subscriber = zmq_socket(context, ZMQ_SUB)
