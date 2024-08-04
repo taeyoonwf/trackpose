@@ -18,21 +18,22 @@ package com.example.android.camerax.tflite
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.RectF
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
-import android.view.WindowManager
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector
@@ -44,6 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.android.example.camerax.tflite.databinding.ActivityCameraBinding
 import mu.KotlinLogging
+import org.json.JSONArray
 import org.json.JSONObject
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
@@ -58,15 +60,16 @@ import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.zeromq.SocketType
 import org.zeromq.ZMQ
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
 
 /** Activity that displays the camera and performs object detection on the incoming frames */
-class CameraActivity : AppCompatActivity() {
+class CameraActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var activityCameraBinding: ActivityCameraBinding
 
@@ -86,11 +89,13 @@ class CameraActivity : AppCompatActivity() {
     private val logger = KotlinLogging.logger {}
     private val zmqContext = ZMQ.context(1)
     private val footageSocket = zmqContext.socket(SocketType.PUB)
-    private val viewer_server_address = "192.168.0.128" //135" //114" //103" //135"
+    private val viewer_server_address = "192.168.0.114" //128" //135" //114" //103" //135"
     private val viewer_port = "5555"
 
     //var bluetoothManager: BluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
     //var bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
 
     private val tfImageProcessor by lazy {
         val cropSize = minOf(bitmapBuffer.width, bitmapBuffer.height)
@@ -163,6 +168,14 @@ class CameraActivity : AppCompatActivity() {
         /* if (bluetoothAdapter == null) {
             // Device doesn't support Bluetooth
         } */
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        if (accelerometer != null) {
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        } else {
+            Toast.makeText(this, "Accelerometer not available", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroy() {
@@ -236,7 +249,13 @@ class CameraActivity : AppCompatActivity() {
 
                 val currentTimestamp = System.currentTimeMillis()
                 val jsonObj: JSONObject = JSONObject()
-                jsonObj.put("timestamp", currentTimestamp)
+                //jsonObj.put("timestamp", currentTimestamp)
+                val accelerometer: JSONArray = JSONArray()
+                accelerometer.put(accX.toDouble())
+                accelerometer.put(accY.toDouble())
+                accelerometer.put(accZ.toDouble())
+                jsonObj.put("accelerometer", accelerometer)
+                // jsonObj.put("timestamp", currentTimestamp)
                 //jsonObj.
                 val frameStr = java.util.Base64.getEncoder().encodeToString(byteArray)
                 val frameTest = java.util.Base64.getEncoder().encode(byteArray)
@@ -244,7 +263,13 @@ class CameraActivity : AppCompatActivity() {
                 jsonObj.put("frame", frameStr)
                 //{"timestamp": currentTimestamp, "frame": java.util.Base64.getEncoder().encode(byteArray)})
                 //stream.write()
-                val jsonStr = jsonObj.toString()
+                //val jsonStr = jsonObj.toString()
+                // "timestamp":1722753514017,
+                // "FPS: ${"%.02f".format(fps)}"
+                val jsonStr = "{\"timestamp\":${currentTimestamp},${jsonObj.toString().substring(1)}"
+                //val jsonStr = "{" + "\"timestamp\":" + currentTimestamp + "," + jsonObj.toString().substring(1) //jsonStr.substring(1)
+                //jsonStr.replaceRange(1, 2, "ABCDE")
+                // jsonStr.replaceRange(1, 1, "\"timestamp\":" + currentTimestamp + ",")
                 footageSocket.send(jsonStr)
                 //footageSocket.send(jsonStr.toByteArray())
                 stream.flush()
@@ -258,9 +283,10 @@ class CameraActivity : AppCompatActivity() {
 
                 // Report only the top prediction
                 //reportPrediction(predictions.maxByOrNull { it.score })
+                reportAccSensor()
 
                 // Compute the FPS of the entire pipeline
-                val frameCount = 10
+                val frameCount = 100
                 if (++frameCounter % frameCount == 0) {
                     frameCounter = 0
                     val now = System.currentTimeMillis()
@@ -284,6 +310,11 @@ class CameraActivity : AppCompatActivity() {
             preview.setSurfaceProvider(activityCameraBinding.viewFinder.surfaceProvider)
 
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun reportAccSensor() = activityCameraBinding.viewFinder.post {
+        activityCameraBinding.textPrediction.text = "${"%.2f".format(accY)} ${"%.2f".format(accZ)}"
+
     }
 
     private fun reportPrediction(
@@ -365,6 +396,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
         // Request permissions each time the app resumes, since they can be revoked at any time
         if (!hasPermissions(this)) {
             ActivityCompat.requestPermissions(
@@ -398,5 +430,37 @@ class CameraActivity : AppCompatActivity() {
         private const val ACCURACY_THRESHOLD = 0.5f
         private const val MODEL_PATH = "coco_ssd_mobilenet_v1_1.0_quant.tflite"
         private const val LABELS_PATH = "coco_ssd_mobilenet_v1_1.0_labels.txt"
+    }
+
+    var accX: Float = 0f
+    var accY: Float = 0f
+    var accZ: Float = 0f
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        val x = event!!.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        accX = x
+        accY = y
+        accZ = z
+        //if (cnt % 200 == 0) {
+            //Log.d(TAG, "XYZ: ${"%.02f".format(x)} ${"%.02f".format(y)} ${"%.02f".format(z)}")
+            //logger.debug { x.toString() + ", " + y + ", " + z }
+        //}
+        if (abs(x) < 1 && abs(y) < 1 && abs(z - SensorManager.GRAVITY_EARTH) < 1) {
+            //Toast.makeText(this, "Device is horizontal", Toast.LENGTH_SHORT).show()
+        } else {
+            //Toast.makeText(this, "Device is not horizontal", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        //TODO("Not yet implemented")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
     }
 }

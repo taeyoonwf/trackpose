@@ -8,6 +8,7 @@ import zmq
 import time
 import json
 from enum import Enum
+import math
 
 
 PORT = '5555'
@@ -33,7 +34,6 @@ class StreamSync:
         self.MIN_TIMESTAMP = 17 * 1e11
         self.DIFF_RESET_MULTIPLIER = 4
 
-        self.curr_frame = None
         self.curr_pub_time = None
 
         self.curr_sub_time = None
@@ -53,10 +53,9 @@ class StreamSync:
             #cv2.waitKey(1)
         return (StreamSync.Action.CONT, None)
 
-    def update(self, timestamp, frame):
+    def update(self, timestamp):
         curr_pub_time = timestamp
         self.curr_pub_time = timestamp
-        self.curr_frame = frame
         self.time_out_counter = 0
         if curr_pub_time < self.MIN_TIMESTAMP:
             print(f'the timestamp of the pub is too much earlier than expected.')
@@ -70,7 +69,6 @@ class StreamSync:
         if not self.last_pub_time:
             self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
             self.pub_sub_diff = curr_pub_sub_diff
-            #self.last_frame = jsonData['frame']
             return (StreamSync.Action.CONT, None)
 
         delta_time = curr_pub_time - self.last_pub_time
@@ -78,7 +76,6 @@ class StreamSync:
             if curr_pub_sub_diff < self.pub_sub_diff - delta_time * 0.5:
                 self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
                 self.pub_sub_diff = curr_pub_sub_diff
-                #self.last_frame = string_to_image(frame)
                 return (StreamSync.Action.CONT, None)
             print(f'{self.pub_sub_diff}, {curr_pub_sub_diff}')
             self.last_pub_time, self.last_sub_time = curr_pub_time, curr_sub_time
@@ -95,7 +92,7 @@ class StreamSync:
         return (StreamSync.Action.PASS, None)
 
 
-    def render(self):
+    def render(self, frame):
         self.last_pub_time, self.last_sub_time = self.curr_pub_time, self.curr_sub_time
         if self.pub_sub_diff_stable < self.STABLE_THRESHOLD:
             #cv2.imshow("Stream", string_to_image(self.last_frame))
@@ -106,7 +103,7 @@ class StreamSync:
             #ret = (StreamSync.Action.PASS, string_to_image(self.curr_frame))
 
         #self.last_frame = jsonData['frame']
-        image = string_to_image(self.curr_frame)
+        image = string_to_image(frame)
         if image.shape != self.loading_frame.shape:
             self.loading_frame = np.zeros(image.shape)
         return (StreamSync.Action.PASS, image)
@@ -135,6 +132,19 @@ class StreamViewer:
                 self.debug_count = 0
                 time.sleep(0.125)
 
+    def draw_accelerometer(self, sensor_value, frame):
+        cx, cy = frame.shape[1] * 0.5, frame.shape[0] * 0.5
+        unt = 50
+        max_val = 9.8
+        h_mult = 0.25
+
+        dx = math.cos(-sensor_value[1] / max_val * math.pi / 2) * unt
+        dy = math.sin(-sensor_value[1] / max_val * math.pi / 2) * unt
+        cv2.line(frame, (int(cx - dx), int(cy - dy)), (int(cx + dx), int(cy + dy)), (0, 255, 0), 1)
+
+        h = sensor_value[2] / max_val * h_mult * cy
+        cv2.line(frame, (int(cx - unt), int(cy - h)), (int(cx + unt), int(cy - h)), (0, 0, 255), 1)
+
     def receive_stream(self, display=True):
         streamSync = StreamSync()
         while self.footage_socket and self.keep_running:
@@ -147,16 +157,25 @@ class StreamViewer:
                 else:
                     #print('poll in data')
                     jsonStr = self.footage_socket.recv_string()
-                    jsonData = json.loads(jsonStr)
+                    # {"timestamp":1722753514017
                     #print(jsonData['timestamp'])
+                    if jsonStr[2:11] == 'timestamp' and jsonStr[13:26].isnumeric():
+                        timestamp = int(jsonStr[13:26])
+                    else:
+                        print(f'timestamp is not correct.')
+                        time.sleep(1)
+                        continue
 
-                    cont, frame = streamSync.update(timestamp = int(jsonData['timestamp']), frame = jsonData['frame'])
+                    cont, frame = streamSync.update(timestamp = timestamp)
                     if cont == StreamSync.Action.CONT:
                         continue
 
-                    cont, frame = streamSync.render()
+                    jsonData = json.loads(jsonStr)
+                    cont, frame = streamSync.render(jsonData['frame'])
                     if cont == StreamSync.Action.CONT:
                         continue
+
+                    self.draw_accelerometer(jsonData['accelerometer'], frame)
 
                 cv2.imshow("Stream", frame)
                 cv2.waitKey(1)
