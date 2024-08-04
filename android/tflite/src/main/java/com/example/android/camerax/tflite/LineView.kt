@@ -23,11 +23,11 @@ class LineView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     init {
         paintRoll.color = android.graphics.Color.GREEN
         paintRoll.alpha = 128
-        paintRoll.strokeWidth = 5f
+        paintRoll.strokeWidth = 7f
 
         paintPitch.color = android.graphics.Color.RED
         paintPitch.alpha = 128
-        paintPitch.strokeWidth = 5f
+        paintPitch.strokeWidth = 7f
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -43,13 +43,14 @@ class LineView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
         val endX = cy + dy
         canvas.drawLine(startX, startY, endX, endY, paintRoll)
 
-        canvas.drawLine(cy + h * cy , cx - unt, cy + h * cy, cx + unt, paintPitch)
+        if (dx != 0f)
+            canvas.drawLine(cy + h * cy , cx - unt, cy + h * cy, cx + unt, paintPitch)
     }
 
     fun setAccelerometer(x: Float, y: Float, z: Float) {
         this.dx = (Math.cos(y / max_val * Math.PI / 2) * unt).toFloat()
         this.dy = (Math.sin(y / max_val * Math.PI / 2) * unt).toFloat()
-        this.h = (z / max_val * h_mult).toFloat()
+        this.h = (z / max_val * h_mult * (if (x < 0) -1f else 1f)).toFloat()
         invalidate() // This will trigger a redraw
     }
 }
