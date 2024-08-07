@@ -28,6 +28,8 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.util.Size
 import android.view.View
@@ -87,10 +89,11 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
     private val tfImageBuffer = TensorImage(DataType.UINT8)
 
     private val logger = KotlinLogging.logger {}
-    private val zmqContext = ZMQ.context(1)
-    private val footageSocket = zmqContext.socket(SocketType.PUB)
-    private val viewer_server_address = "192.168.0.114" //128" //135" //114" //103" //135"
+    private var zmqContext = ZMQ.context(1)
+    private var footageSocket = zmqContext.socket(SocketType.PUB)
+    private val viewer_server_address = "192.168.0.1" // 13.114" //128" //135" //114" //103" //135"
     private val viewer_port = "5555"
+    private val base36code = "1qazxsw23edcvfr45tgbnhy67ujmki89olp0"
 
     //var bluetoothManager: BluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
     //var bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
@@ -176,6 +179,35 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
         } else {
             Toast.makeText(this, "Accelerometer not available", Toast.LENGTH_SHORT).show()
         }
+
+        activityCameraBinding.networkCode?.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                Log.d(TAG, "${s.toString()}")
+                val code = s.toString()
+                if (code.length == 4) {
+                    val id0 = base36code.indexOfFirst { it == code.get(0) }
+                    val id1 = base36code.indexOfFirst { it == code.get(1) }
+                    val id2 = base36code.indexOfFirst { it == code.get(2) }
+                    val id3 = base36code.indexOfFirst { it == code.get(3) }
+                    if ((id0 and 24) == 16) {
+                        val n2 = ((id0 and 7) shl 5) or (id1)
+                        val n3 = (id2 shl 4) or id3
+
+                        footageSocket.close()
+                        zmqContext.close()
+                        zmqContext = ZMQ.context(1)
+                        footageSocket = zmqContext.socket(SocketType.PUB)
+                        footageSocket.connect("tcp://192.168." + n2.toString() + "." + n3.toString() + ":" + viewer_port)
+                    }
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -205,13 +237,13 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
 
             // Set up the view finder use case to display camera preview
             val preview = Preview.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .setTargetRotation(activityCameraBinding.viewFinder.display.rotation)
                 .build()
 
             // Set up the image analysis use case which will process frames in real time
             val imageAnalysis = ImageAnalysis.Builder()
-                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .setTargetRotation(activityCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
