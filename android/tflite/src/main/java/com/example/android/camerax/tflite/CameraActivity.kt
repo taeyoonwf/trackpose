@@ -94,6 +94,7 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
     private val viewer_server_address = "192.168.0.1" // 13.114" //128" //135" //114" //103" //135"
     private val viewer_port = "5555"
     private val base36code = "1qazxsw23edcvfr45tgbnhy67ujmki89olp0"
+    private var zmqPause = false
 
     //var bluetoothManager: BluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
     //var bluetoothAdapter: BluetoothAdapter = bluetoothManager.adapter
@@ -193,11 +194,13 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
                         val n2 = ((id0 and 7) shl 5) or (id1)
                         val n3 = (id2 shl 4) or id3
 
+                        zmqPause = true
                         footageSocket.close()
                         zmqContext.close()
                         zmqContext = ZMQ.context(1)
                         footageSocket = zmqContext.socket(SocketType.PUB)
                         footageSocket.connect("tcp://192.168." + n2.toString() + "." + n3.toString() + ":" + viewer_port)
+                        zmqPause = false
                     }
                 }
             }
@@ -302,7 +305,8 @@ class CameraActivity : AppCompatActivity(), SensorEventListener {
                 //val jsonStr = "{" + "\"timestamp\":" + currentTimestamp + "," + jsonObj.toString().substring(1) //jsonStr.substring(1)
                 //jsonStr.replaceRange(1, 2, "ABCDE")
                 // jsonStr.replaceRange(1, 1, "\"timestamp\":" + currentTimestamp + ",")
-                footageSocket.send(jsonStr)
+                if (!zmqPause)
+                    footageSocket.send(jsonStr)
                 //footageSocket.send(jsonStr.toByteArray())
                 stream.flush()
                 stream.close()
